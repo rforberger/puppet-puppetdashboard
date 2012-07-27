@@ -255,6 +255,7 @@ class puppetdashboard (
   $debug               = params_lookup( 'debug' , 'global' ),
   $audit_only          = params_lookup( 'audit_only' , 'global' ),
   $package             = params_lookup( 'package' ),
+  $passenger           = params_lookup( 'passenger' ),
   $service             = params_lookup( 'service' ),
   $service_workers     = params_lookup( 'service_workers' ),
   $service_status      = params_lookup( 'service_status' ),
@@ -285,7 +286,16 @@ class puppetdashboard (
   $bool_firewall=any2bool($firewall)
   $bool_debug=any2bool($debug)
   $bool_audit_only=any2bool($audit_only)
+  $bool_passenger=any2bool($passenger)
 
+  
+  ### If we should use passenger instead of webbrick
+  if $bool_passenger == true {
+    $bool_absent = true
+    $bool_disable = true
+    include puppetdashboard::passenger
+  }
+  
   ### Definition of some variables used in the module
   $manage_package = $puppetdashboard::bool_absent ? {
     true  => 'absent',
@@ -516,5 +526,6 @@ class puppetdashboard (
       content => inline_template('<%= scope.to_hash.reject { |k,v| k.to_s =~ /(uptime.*|path|timestamp|free|.*password.*|.*psk.*|.*key)/ }.to_yaml %>'),
     }
   }
+
 
 }

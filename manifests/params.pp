@@ -125,5 +125,19 @@ class puppetdashboard::params {
   $puppi_helper = 'standard'
   $debug = false
   $audit_only = false
+  
+  
+  if $bool_passenger == true {
+    # passenger defaults
+    if $::operatingsystem == 'Debian'
+    or $::operatingsystem == 'Ubuntu' {
+      $passenger_package_name = 'libapache2-mod-passenger',
+    }
+    else {
+      fail('Operating system not yet supported by module')
+    }
+  }
+  
+  
 
 }
