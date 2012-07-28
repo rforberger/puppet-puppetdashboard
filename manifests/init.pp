@@ -281,7 +281,9 @@ class puppetdashboard (
   $file_src_sslcrt,
   $file_src_sslkey,
   $file_src_sslcrl    = undef,
-  $file_src_sslca     = undef
+  $file_src_sslca     = undef,
+  $github             = false,
+  $ospackage          = false,  
   ) inherits puppetdashboard::params {
 
   $bool_source_dir_purge=any2bool($source_dir_purge)
@@ -294,6 +296,10 @@ class puppetdashboard (
   $bool_audit_only=any2bool($audit_only)
   $bool_passenger=any2bool($passenger)
 
+  
+  if $ospackage == false and $github == false { fail('You must set one out of github or ospackage to true') }
+  if $ospackage == true and $github == true { fail('You must not set github and ospackage to true') }
+  
 
   ### If we should use passenger instead of webbrick
   if $bool_passenger == true {
@@ -385,29 +391,13 @@ class puppetdashboard (
   ### MySql grants 
   include puppetdashboard::mysql
 
-  ### Managed resources
-  package { 'puppetdashboard':
-    ensure => $puppetdashboard::manage_package,
-    name   => $puppetdashboard::package,
-    notify => Exec['puppetdashboard_dbmigrate'],
+  if $ospackage == true {
+    ### Install from OS packages
+    include puppetdashboard::ospackage
   }
-
-  service { 'puppetdashboard':
-    ensure     => $puppetdashboard::manage_service_ensure,
-    name       => $puppetdashboard::service,
-    enable     => $puppetdashboard::manage_service_enable,
-    hasstatus  => $puppetdashboard::service_status,
-    pattern    => $puppetdashboard::process,
-    require    => [ Package['puppetdashboard'] , Class['puppetdashboard::mysql'] ],
-  }
-
-  service { 'puppetdashboard-workers':
-    ensure     => $puppetdashboard::manage_service_ensure,
-    name       => $puppetdashboard::service_workers,
-    enable     => $puppetdashboard::manage_service_enable,
-    hasstatus  => $puppetdashboard::service_status,
-    pattern    => $puppetdashboard::process,
-    require    => [ Package['puppetdashboard'] , Class['puppetdashboard::mysql'] ],
+  
+  if $github == true {
+    include puppetdashboard::githubinstall
   }
 
   file { 'puppetdashboard.conf':
