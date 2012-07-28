@@ -273,13 +273,19 @@ class puppetdashboard (
   $log_dir             = params_lookup( 'log_dir' ),
   $log_file            = params_lookup( 'log_file' ),
   $port                = params_lookup( 'port' ),
-  $protocol            = params_lookup( 'protocol' )
+  $protocol            = params_lookup( 'protocol' ),
+  $listen_ip4          = params_lookup( 'listen_ip4' ),
+  $listen_ip6          = params_lookup( 'listen_ip6' ),
+  $install_root        = params_lookup( 'install_root' ),
+  $service_url,
+  $file_src_sslcrt,
+  $file_src_sslkey,
+  $file_src_sslcrl    = undef,
+  $file_src_sslca     = undef
   ) inherits puppetdashboard::params {
 
   $bool_source_dir_purge=any2bool($source_dir_purge)
   $bool_service_autorestart=any2bool($service_autorestart)
-  $bool_absent=any2bool($absent)
-  $bool_disable=any2bool($disable)
   $bool_disableboot=any2bool($disableboot)
   $bool_monitor=any2bool($monitor)
   $bool_puppi=any2bool($puppi)
@@ -288,14 +294,24 @@ class puppetdashboard (
   $bool_audit_only=any2bool($audit_only)
   $bool_passenger=any2bool($passenger)
 
-  
+
   ### If we should use passenger instead of webbrick
   if $bool_passenger == true {
     $bool_absent = true
     $bool_disable = true
+
+    $sslcrt = "${ssldir}/${service_url}.crt"
+    $sslkey = "${ssldir}/${service_url}.key"
+    $sslcrl = "${ssldir}/${service_url}.crl"
+    $sslca = undef
+
     include puppetdashboard::passenger
   }
-  
+  else {
+    $bool_absent=any2bool($absent)
+    $bool_disable=any2bool($disable)
+  }
+
   ### Definition of some variables used in the module
   $manage_package = $puppetdashboard::bool_absent ? {
     true  => 'absent',

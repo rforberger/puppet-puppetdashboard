@@ -1,0 +1,89 @@
+# File managed through Puppet, changes will be overwritten.
+# Puppet Dashboard production virtual host
+#
+PassengerHighPerformance on
+PassengerMaxPoolSize 12
+PassengerPoolIdleTime 1500
+# PassengerMaxRequests 1000
+PassengerStatThrottleRate 120
+RailsAutoDetect On
+
+NameVirtualHost <%= listen_ip %>:<%= port %>
+<VirtualHost <%= listen_ip %>:<%= port %>>
+  ServerSignature on
+
+  SSLEngine on
+  SSLProtocol -ALL +SSLv3 +TLSv1
+  SSLCipherSuite ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:-LOW:-SSLv2:-EXP
+
+  <% if @sslca %>
+  SSLCACertificateFile <%= sslca %>
+  <% end %>
+  SSLCertificateFile <%= sslcrt %>
+  SSLCertificateKeyFile <%= sslkey %>
+  <% if @sslcrl %>
+  SSLCARevocationFile <%= sslcrl %>
+  <% end %>
+
+  SSLVerifyClient optional
+  SSLVerifyDepth  1
+  SSLOptions +StdEnvVars
+
+  ServerName <%= service_url %>
+  DocumentRoot <%= install_root %>/public
+	SetEnv RAILS_ENV production
+
+  <Directory <%= install_root %>/public>
+		Options None
+		AllowOverride AuthConfig
+		Order allow,deny
+		Allow from all
+	</Directory>
+
+  LogLevel warn
+  ErrorLog /var/log/apache2/<%= service_url %>_error.log
+  CustomLog /var/log/apache2/<%= service_url %>_access.log combined
+
+# Uncomment this section to enable basic auth. This section can also be copied
+# to the HTTPS VirtualHost example below.
+#   # For report submission from masters.
+#   <Location /reports/upload>
+#       <Limit POST>
+#           # Configuration restricts HTTP actions to POST only
+#           Order allow,deny
+#           # Allow from localhost
+#           # Allow from localhost.localdomain
+#           # Allow from 127.0.0.1
+#           # Allow from example.com
+#           # This can be locked down to just your puppet master if required
+#           # See examples above, or http://httpd.apache.org/docs/2.2/howto/access.html
+#           Allow from all
+#           Satisfy any
+#       </Limit>
+#   </Location>
+#
+#   # For node definitions from masters.
+#   <Location /nodes>
+#       <Limit GET>
+#           # Configuration restricts HTTP actions to GET only
+#           Order allow,deny
+#           # Allow from localhost.localdomain
+#           # Allow from localhost
+#           # Allow from 127.0.0.1
+#           # Allow from example.com
+#           # This can be locked down to just your puppet master if required
+#           # See examples above, or http://httpd.apache.org/docs/2.2/howto/access.html
+#           Allow from all
+#           Satisfy any
+#       </Limit>
+#   </Location>
+#
+#   # For web access by humans.
+#   <Location "/">
+#       AuthType basic
+#       AuthName "Puppet Dashboard"
+#       Require valid-user
+#       AuthBasicProvider file
+#       AuthUserFile /etc/apache2/passwords # Change to your preferred password file location
+#   </Location>
+</VirtualHost>

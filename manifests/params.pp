@@ -51,6 +51,8 @@ class puppetdashboard::params {
     default                   => 'httpd',
   }
 
+  $install_root = '/usr/share/puppet-dashboard/'
+
   $config_dir = $::operatingsystem ? {
     default => '/usr/share/puppet-dashboard/config',
   }
@@ -125,19 +127,14 @@ class puppetdashboard::params {
   $puppi_helper = 'standard'
   $debug = false
   $audit_only = false
-  
-  
-  if $bool_passenger == true {
-    # passenger defaults
-    if $::operatingsystem == 'Debian'
-    or $::operatingsystem == 'Ubuntu' {
-      $passenger_package_name = 'libapache2-mod-passenger',
-    }
-    else {
-      fail('Operating system not yet supported by module')
-    }
+
+  # use the systems default addresses as default for apache vhost listeners
+  $listen_ip4 = $ipaddress
+  $listen_ip6 = $ipaddress6
+
+  $ssldir = $::operatingsystem ? {
+    /(?i:Debian|Ubuntu|Mint)/ => '/etc/apache2/ssl',
+    default                   => '/etc/apache2/ssl',
   }
-  
-  
 
 }
