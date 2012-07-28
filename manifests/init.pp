@@ -388,14 +388,14 @@ class puppetdashboard (
     default   => template($puppetdashboard::template),
   }
 
-  ### MySql grants 
+  ### MySql grants
   include puppetdashboard::mysql
 
   if $ospackage == true {
     ### Install from OS packages
     include puppetdashboard::ospackage
   }
-  
+
   if $github == true {
     include puppetdashboard::githubinstall
   }
@@ -406,8 +406,14 @@ class puppetdashboard (
     mode    => $puppetdashboard::config_file_mode,
     owner   => $puppetdashboard::config_file_owner,
     group   => $puppetdashboard::config_file_group,
-    require => Package['puppetdashboard'],
-    notify  => $puppetdashboard::manage_service_autorestart,
+    require => $ospackage ? {
+      true  => Package['puppetdashboard'],
+      false => undef,
+    },
+    notify  => $bool_passenger ? {
+      false => $puppetdashboard::manage_service_autorestart,
+      true  => undef,
+    },
     source  => $puppetdashboard::manage_file_source,
     content => $puppetdashboard::manage_file_content,
     replace => $puppetdashboard::manage_file_replace,
@@ -420,8 +426,14 @@ class puppetdashboard (
     mode    => $puppetdashboard::config_file_mode,
     owner   => $puppetdashboard::config_file_owner,
     group   => $puppetdashboard::config_file_group,
-    require => Package['puppetdashboard'],
-    notify  => $puppetdashboard::manage_service_autorestart,
+    require => $ospackage ? {
+      true  => Package['puppetdashboard'],
+      false => undef,
+    },
+    notify  => $bool_passenger ? {
+      false => $puppetdashboard::manage_service_autorestart,
+      true  => undef,
+    },
     content => template( "$puppetdashboard::template_db" ),
     replace => $puppetdashboard::manage_file_replace,
     audit   => $puppetdashboard::manage_audit,
@@ -433,22 +445,34 @@ class puppetdashboard (
     file { 'default-puppetdashboard':
       ensure  => $puppetdashboard::manage_file,
       path    => $puppetdashboard::config_file_init,
-      require => Package[puppetdashboard],
+      require => $ospackage ? {
+        true  => Package['puppetdashboard'],
+        false => undef,
+      },
       content => template('puppetdashboard/default.init-ubuntu'),
       mode    => $puppetdashboard::config_file_mode,
       owner   => $puppetdashboard::config_file_owner,
       group   => $puppetdashboard::config_file_group,
-      notify  => $puppetdashboard::manage_service_autorestart,
+      notify  => $bool_passenger ? {
+        false => $puppetdashboard::manage_service_autorestart,
+        true  => undef,
+      },
     }
     file { 'default-puppetdashboard-workers':
       ensure  => $puppetdashboard::manage_file,
       path    => "${puppetdashboard::config_file_init}-workers",
-      require => Package[puppetdashboard],
+      require => $ospackage ? {
+        true  => Package['puppetdashboard'],
+        false => undef,
+      },
       content => template('puppetdashboard/default-workers.init-ubuntu'),
       mode    => $puppetdashboard::config_file_mode,
       owner   => $puppetdashboard::config_file_owner,
       group   => $puppetdashboard::config_file_group,
-      notify  => $puppetdashboard::manage_service_autorestart,
+      notify  => $bool_passenger ? {
+        false => $puppetdashboard::manage_service_autorestart,
+        true  => undef,
+      },
     }
   }
 
@@ -457,7 +481,10 @@ class puppetdashboard (
     file { 'puppetdashboard.dir':
       ensure  => directory,
       path    => $puppetdashboard::config_dir,
-      require => Package['puppetdashboard'],
+      require => $ospackage ? {
+        true  => Package['puppetdashboard'],
+        false => undef,
+      },
       notify  => $puppetdashboard::manage_service_autorestart,
       source  => $puppetdashboard::source_dir,
       recurse => true,

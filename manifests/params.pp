@@ -138,7 +138,7 @@ class puppetdashboard::params {
   }
   
   $github_os_packages = $::operatingsystem ? {
-    /(?i:Debian|Ubuntu|Mint)/ =>  [ 'build-essential', 'irb', 'libmysql-ruby', 'libmysqlclient-dev', 'libopenssl-ruby', 'libreadline-ruby', 'rake', 'rdoc', 'ri', 'ruby', 'ruby-dev' ],
+    /(?i:Debian|Ubuntu|Mint)/ =>  [ 'build-essential', 'irb', 'libmysqlclient-dev', 'libopenssl-ruby', 'libreadline-ruby', 'rake', 'rdoc', 'ri', 'ruby', 'ruby-dev' ],
     default                   => undef # FIXME
   }
 }
