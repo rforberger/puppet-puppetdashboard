@@ -136,9 +136,12 @@ class puppetdashboard::params {
     /(?i:Debian|Ubuntu|Mint)/ => '/etc/apache2/ssl',
     default                   => '/etc/apache2/ssl',
   }
-  
+
   $github_os_packages = $::operatingsystem ? {
     /(?i:Debian|Ubuntu|Mint)/ =>  [ 'build-essential', 'irb', 'libmysqlclient-dev', 'libopenssl-ruby', 'libreadline-ruby', 'rake', 'rdoc', 'ri', 'ruby', 'ruby-dev' ],
     default                   => undef # FIXME
   }
+
+  # current stable version
+  $dashboard_version = '1.2.10'
 }

@@ -283,7 +283,8 @@ class puppetdashboard (
   $file_src_sslcrl    = undef,
   $file_src_sslca     = undef,
   $github             = false,
-  $ospackage          = false,  
+  $ospackage          = false,
+  $dashboard_version  = params_lookup( 'dashboard_version' )
   ) inherits puppetdashboard::params {
 
   $bool_source_dir_purge=any2bool($source_dir_purge)
