@@ -42,7 +42,13 @@ class puppetdashboard::githubinstall::rubygems inherits puppetdashboard {
   }
 
 
-  file { "$TMPDIR/${PKG}":
+  # clean up
+  file { "${TMPDIR}/${PKG}":
+    ensure  => absent,
+    force   => true,
+    require => Exec[$INSTALLCMD],
+  }
+  file { "${TMPDIR}/${PKG}.tgz":
     ensure  => absent,
     force   => true,
     require => Exec[$INSTALLCMD],
