@@ -5,7 +5,9 @@ class puppetdashboard::githubinstall::dashboard inherits puppetdashboard {
   $CLONE_CMD="/usr/bin/git clone ${DASHBOARD_URL} ${puppetdashboard::install_root}"
 
   $CHECKOUT_CMD="/usr/bin/git checkout ${puppetdashboard::dashboard_version}"
-  $NEWBRANCH_CMD="/usr/bin/git checkout -b production"
+  $BRANCH='production'
+  $NEWBRANCH_CMD="/usr/bin/git checkout -b ${BRANCH}"
+  $SWITCH_BRANCH_CMD="/usr/bin/git checkout ${BRANCH}"
 
   case $osfamily {
     Debian: {
@@ -36,6 +38,7 @@ class puppetdashboard::githubinstall::dashboard inherits puppetdashboard {
     user      => $owner,
     group     => $group,
     cwd       => $puppetdashboard::install_root,
+    unless    => "/usr/bin/git describe | grep ${puppetdashboard::dashboard_version} >/dev/null",
     require   => Exec[$CLONE_CMD],
   }
 
@@ -44,8 +47,20 @@ class puppetdashboard::githubinstall::dashboard inherits puppetdashboard {
     user      => $owner,
     group     => $group,
     cwd       => $puppetdashboard::install_root,
+    unless    => "/usr/bin/git branch | grep ${BRANCH} >/dev/null",
     require   => Exec[$CHECKOUT_CMD],
   }
+
+  exec { $SWITCH_BRANCH_CMD:
+    logoutput => true,
+    user      => $owner,
+    group     => $group,
+    cwd       => $puppetdashboard::install_root,
+    onlyif    => "/usr/bin/git branch | grep 'no branch' >/dev/null",
+    unless    => "/usr/bin/git branch | egrep '^* ${BRANCH}' >/dev/null",
+    require   => Exec[$CHECKOUT_CMD],
+  }
+
 
 }
 
